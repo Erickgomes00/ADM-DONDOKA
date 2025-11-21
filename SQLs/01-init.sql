@@ -1,34 +1,32 @@
 -- =====================================
--- 👤 Tabela: usuario
+-- 🔧 MIGRATION: Atualizações necessárias
 -- =====================================
-CREATE TABLE IF NOT EXISTS usuario (
+
+-- 1) Criar tabela usuarios se não existir
+CREATE TABLE IF NOT EXISTS usuarios (
     id SERIAL PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    senha VARCHAR(255) NOT NULL,
-    tipo VARCHAR(50) DEFAULT 'cliente',
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    nome VARCHAR(150) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    senha_hash VARCHAR(255) NOT NULL,
+    cpf VARCHAR(14) UNIQUE NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- =====================================
--- 🎨 Tabela: genero
--- =====================================
+-- 2) Criar tabela genero
 CREATE TABLE IF NOT EXISTS genero (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) UNIQUE NOT NULL
 );
 
--- =====================================
--- 🏷️ Tabela: categoria
--- =====================================
+-- 3) Criar tabela categoria
 CREATE TABLE IF NOT EXISTS categoria (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) UNIQUE NOT NULL
 );
 
--- =====================================
--- 👕 Tabela: produto
--- =====================================
+-- 4) Criar tabela produto
 CREATE TABLE IF NOT EXISTS produto (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
@@ -43,36 +41,32 @@ CREATE TABLE IF NOT EXISTS produto (
     FOREIGN KEY (genero_id) REFERENCES genero(id) ON DELETE CASCADE
 );
 
--- =====================================
--- 🏠 Tabela: endereco_usuario
--- =====================================
+-- 5) Criar tabela endereco_usuario
 CREATE TABLE IF NOT EXISTS endereco_usuario (
     id SERIAL PRIMARY KEY,
     usuario_id INT NOT NULL,
-    rua VARCHAR(255),
-    numero VARCHAR(10),
-    bairro VARCHAR(100),
-    cidade VARCHAR(100),
-    cep VARCHAR(20),
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE
+    cep VARCHAR(20) NOT NULL,
+    endereco VARCHAR(255) NOT NULL,
+    numero VARCHAR(20),
+    complemento VARCHAR(255),
+    bairro VARCHAR(150),
+    cidade VARCHAR(150),
+    estado VARCHAR(2),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
 
--- =====================================
--- 🛒 Tabela: carrinho
--- =====================================
+-- 6) Criar tabela carrinho
 CREATE TABLE IF NOT EXISTS carrinho (
     id SERIAL PRIMARY KEY,
     usuario_id INT,
     status TEXT CHECK (status IN ('Ativo', 'Finalizado', 'Cancelado')) DEFAULT 'Ativo',
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuario(id)
-        ON DELETE SET NULL
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
 );
 
--- =====================================
--- 📦 Tabela: item_carrinho
--- =====================================
+-- 7) Criar tabela item_carrinho
 CREATE TABLE IF NOT EXISTS item_carrinho (
     id SERIAL PRIMARY KEY,
     carrinho_id INT NOT NULL,
