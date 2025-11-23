@@ -1,4 +1,4 @@
 AuthType Basic
 AuthName "Área Restrita"
-AuthUserFile /var/www/html/.htpasswd
+AuthUserFile /opt/render/project/src/.htpasswd
 Require valid-user
