@@ -14,11 +14,12 @@ RUN a2enmod rewrite
 # Copia todo o projeto para o diretório do Apache
 COPY . /var/www/html
 
-# Copia o arquivo .htpasswd para /var/www/html (onde o .htaccess está apontando)
+# Copia o arquivo .htpasswd para /var/www/html
 COPY .htpasswd /var/www/html/.htpasswd
 
-# Garante que o Apache permita usar .htaccess
-RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+# Garante que o Apache permita .htaccess no VirtualHost
+RUN sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' \
+    /etc/apache2/sites-available/000-default.conf
 
 # Ajusta permissões
 RUN chown -R www-data:www-data /var/www/html \
