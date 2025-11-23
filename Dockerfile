@@ -1,32 +1,23 @@
-# Usa a imagem oficial do PHP com Apache
 FROM php:8.2-apache
 
-# Atualiza pacotes e instala extensões necessárias para PostgreSQL
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    unzip \
-    && docker-php-ext-install pgsql pdo pdo_pgsql \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Ativa o mod_rewrite (necessário para .htaccess funcionar)
+# Ativa módulos necessários
 RUN a2enmod rewrite
+RUN a2enmod auth_basic
 
-# Copia o projeto para /var/www/html (Apache root)
-COPY . /var/www/html
+# Copia o projeto para o caminho correto do Render
+COPY . /opt/render/project/src
 
-# Copia o .htpasswd exatamente para onde o Render executa o código
-COPY .htpasswd /opt/render/project/src/.htpasswd
+# Remove qualquer .htpasswd antigo
+RUN rm -f /opt/render/project/src/.htpasswd
 
-# Ajusta o VirtualHost para permitir .htaccess
-RUN sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' \
-    /etc/apache2/sites-available/000-default.conf
+# Cria o .htpasswd com usuário adm e senha 123456
+RUN htpasswd -bc /opt/render/project/src/.htpasswd adm 123456
 
 # Ajusta permissões
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && chmod 644 /opt/render/project/src/.htpasswd
+RUN chown -R www-data:www-data /opt/render/project/src
 
-WORKDIR /var/www/html
+# Ajusta o DocumentRoot do Apache
+RUN sed -i 's|/var/www/html|/opt/render/project/src|g' /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 80
 
