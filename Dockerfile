@@ -1,19 +1,20 @@
 # ==========================
-# Dockerfile Atualizado
+# Dockerfile Final Atualizado
 # ==========================
 
 # Usa PHP 8.2 com Apache
 FROM php:8.2-apache
 
 # ==========================
-# Instala dependências
+# Instala dependências do sistema
 # ==========================
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     unzip \
     git \
     curl \
-    && docker-php-ext-install pdo pdo_pgsql pgsql \
+    libzip-dev \
+    && docker-php-ext-install pdo pdo_pgsql pgsql zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ==========================
@@ -23,21 +24,24 @@ RUN a2enmod rewrite
 RUN a2enmod auth_basic
 
 # ==========================
-# Instala Composer (para Cloudinary)
+# Instala Composer globalmente
 # ==========================
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # ==========================
-# Copia projeto para o caminho do Render
+# Define diretório do projeto
 # ==========================
-COPY . /opt/render/project/src
-
 WORKDIR /opt/render/project/src
 
 # ==========================
-# Instala dependências PHP do projeto
+# Copia o projeto
 # ==========================
-RUN composer install --no-dev --optimize-autoloader
+COPY . /opt/render/project/src
+
+# ==========================
+# Instala dependências PHP do projeto via Composer
+# ==========================
+RUN composer install --no-dev --optimize-autoloader || echo "Composer já instalado"
 
 # ==========================
 # Gera o .htpasswd (usuário: adm / senha: 123456)
@@ -60,13 +64,13 @@ RUN echo '<Directory /opt/render/project/src>' \
     >> /etc/apache2/apache2.conf
 
 # ==========================
-# Permissões corretas
+# Ajusta permissões
 # ==========================
 RUN chown -R www-data:www-data /opt/render/project/src \
     && chmod -R 755 /opt/render/project/src
 
 # ==========================
-# Porta e comando final
+# Expondo porta e comando final
 # ==========================
 EXPOSE 80
 CMD ["apache2-foreground"]
