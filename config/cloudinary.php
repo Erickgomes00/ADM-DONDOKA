@@ -1,5 +1,6 @@
 <?php
-require _DIR_ . '/vendor/autoload.php';
+// CORRETO: Dois underscores antes e dois depois.
+require __DIR__ . '/vendor/autoload.php'; 
 
 use Cloudinary\Cloudinary;
 
