@@ -11,19 +11,20 @@ RUN apt-get update && apt-get install -y \
 # Ativa o mod_rewrite (necessário para .htaccess funcionar)
 RUN a2enmod rewrite
 
-# Copia todo o projeto para o diretório do Apache
+# Copia o projeto para /var/www/html (Apache root)
 COPY . /var/www/html
 
-# Copia o arquivo .htpasswd para /var/www/html
-COPY .htpasswd /var/www/html/.htpasswd
+# Copia o .htpasswd exatamente para onde o Render executa o código
+COPY .htpasswd /opt/render/project/src/.htpasswd
 
-# Garante que o Apache permita .htaccess no VirtualHost
+# Ajusta o VirtualHost para permitir .htaccess
 RUN sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' \
     /etc/apache2/sites-available/000-default.conf
 
 # Ajusta permissões
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+    && chmod -R 755 /var/www/html \
+    && chmod 644 /opt/render/project/src/.htpasswd
 
 WORKDIR /var/www/html
 
