@@ -14,21 +14,18 @@ RUN a2enmod rewrite
 # Copia todo o projeto para o diretório do Apache
 COPY . /var/www/html
 
-# Copia o arquivo .htpasswd para a pasta do Apache
-COPY .htpasswd /etc/apache2/.htpasswd
+# Copia o arquivo .htpasswd para /var/www/html (onde o .htaccess está apontando)
+COPY .htpasswd /var/www/html/.htpasswd
 
-# Garante que o Apache permita .htaccess (AllowOverride All)
+# Garante que o Apache permita usar .htaccess
 RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
-# Ajusta permissões para uploads e logs
+# Ajusta permissões
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
-# Define o diretório padrão do Apache
 WORKDIR /var/www/html
 
-# Expondo a porta 80
 EXPOSE 80
 
-# Comando padrão para iniciar o Apache em primeiro plano
 CMD ["apache2-foreground"]
