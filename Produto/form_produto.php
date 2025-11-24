@@ -23,8 +23,24 @@ try {
 
 // Carrega categorias e gêneros
 try {
-    $categorias = $conn->query('SELECT id, nome FROM categoria ORDER BY nome')->fetchAll();
-    $generos = $conn->query('SELECT id, nome FROM genero ORDER BY nome')->fetchAll();
+    $categorias = $conn->query("
+        SELECT * FROM categoria ORDER BY 
+            CASE 
+                WHEN nome='Calca' THEN 1
+                WHEN nome='Camisa' THEN 2
+                WHEN nome='Blusa' THEN 3
+                WHEN nome='Jaqueta' THEN 4
+                WHEN nome='Casacos' THEN 5
+                WHEN nome='Jeans' THEN 6
+                WHEN nome='Vestidos' THEN 7
+                WHEN nome='Shorts' THEN 8
+                WHEN nome='Saias' THEN 9
+                WHEN nome='Moda Praia' THEN 10
+                WHEN nome='Moda Inverno' THEN 11
+            END
+    ")->fetchAll();
+
+    $generos = $conn->query('SELECT * FROM genero ORDER BY nome')->fetchAll();
 } catch (PDOException $e) {
     die("❌ Erro ao buscar dados: " . $e->getMessage());
 }
@@ -77,20 +93,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <title>Cadastro de Produto</title>
 <style>
-/* MESMO ESTILO QUE VOCÊ USAVA */
-body { background-color: #1e1e1e; color: #fff; font-family: Arial, sans-serif; margin:0;padding:0;}
-.container { max-width:700px; margin:50px auto; background-color:#2e2e2e; padding:30px; border-radius:10px;}
-h1 { text-align:center; margin-bottom:30px;}
-label { display:block; margin-bottom:5px; font-weight:bold;}
-input[type="text"], input[type="number"], select, input[type="file"], textarea {
-    width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:none; background-color:#3a3a3a; color:#fff;
-}
-textarea { height:100px; resize:none; }
-input[type="file"] { padding:5px; }
-button { background-color:#555; color:#fff; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-size:16px;}
-button:hover { background-color:#777; }
-a { display:inline-block; margin-top:15px; text-decoration:none; color:#fff;}
-a:hover { text-decoration:underline;}
+body { background-color: #1e1e1e; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 0; }
+.container { max-width: 700px; margin: 50px auto; background-color: #2e2e2e; padding: 30px; border-radius: 10px; }
+h1 { text-align: center; margin-bottom: 30px; }
+label { display: block; margin-bottom: 5px; font-weight: bold; }
+input[type="text"], input[type="number"], textarea, select, input[type="file"] { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: none; background-color: #3a3a3a; color: #fff; }
+textarea { resize: vertical; }
+button { background-color: #555; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+button:hover { background-color: #777; }
+a { display: inline-block; margin-top: 15px; text-decoration: none; color: #fff; }
+a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -102,7 +114,7 @@ a:hover { text-decoration:underline;}
     <input type="text" name="nome" required>
 
     <label>Descrição:</label>
-    <textarea name="descricao" required></textarea>
+    <textarea name="descricao" rows="4" required></textarea>
 
     <label>Preço:</label>
     <input type="number" name="preco" step="0.01" required>
