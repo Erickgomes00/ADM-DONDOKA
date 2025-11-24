@@ -16,22 +16,23 @@ if (isset($_GET['excluir'])) {
 // ATUALIZAR PRODUTO
 // ========================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['atualizar'])) {
-
     $id = intval($_POST['id']);
     $nome = $_POST['nome'];
+    $descricao = $_POST['descricao'];
     $preco = floatval($_POST['preco']);
     $estoque = intval($_POST['estoque']);
     $categoria_id = intval($_POST['categoria_id']);
     $genero_id = intval($_POST['genero_id']);
 
     $sql = "UPDATE produto 
-            SET nome = :nome, preco = :preco, estoque = :estoque, 
+            SET nome = :nome, descricao = :descricao, preco = :preco, estoque = :estoque, 
                 categoria_id = :categoria_id, genero_id = :genero_id
             WHERE id = :id";
 
     $stmt = $conn->prepare($sql);
     $stmt->execute([
         ':nome' => $nome,
+        ':descricao' => $descricao,
         ':preco' => $preco,
         ':estoque' => $estoque,
         ':categoria_id' => $categoria_id,
@@ -69,7 +70,7 @@ $generos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // ========================
 // BUSCAR TODOS PRODUTOS
 // ========================
-$sql = "SELECT p.id, p.nome, p.preco, p.estoque, p.imagem_url,
+$sql = "SELECT p.id, p.nome, p.descricao, p.preco, p.estoque, p.imagem_url,
                c.nome AS categoria, g.nome AS genero
         FROM produto p
         LEFT JOIN categoria c ON p.categoria_id = c.id
@@ -79,6 +80,7 @@ $sql = "SELECT p.id, p.nome, p.preco, p.estoque, p.imagem_url,
 $stmt = $conn->query($sql);
 $produtos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -86,7 +88,7 @@ $produtos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <title>Listar Produtos</title>
 <style>
 body { background-color: #1e1e1e; color: #fff; font-family: Arial, sans-serif; }
-.container { max-width: 900px; margin: 50px auto; background-color: #2e2e2e; padding: 30px; border-radius: 10px; }
+.container { max-width: 1000px; margin: 50px auto; background-color: #2e2e2e; padding: 30px; border-radius: 10px; }
 h1 { text-align: center; margin-bottom: 20px; }
 table { width: 100%; border-collapse: collapse; }
 th, td { border: 1px solid #555; padding: 10px; text-align: center; }
@@ -96,7 +98,8 @@ tr:hover { background-color: #3e3e3e; }
 a, button { color: #fff; text-decoration: none; padding: 5px 10px; border-radius: 5px; background-color: #555; border: none; cursor: pointer; }
 a:hover, button:hover { background-color: #777; }
 img { max-width: 100px; }
-.form-editar input, .form-editar select { width: 100%; padding: 8px; margin: 5px 0; border-radius: 5px; border: none; }
+.form-editar input, .form-editar select, .form-editar textarea { width: 100%; padding: 8px; margin: 5px 0; border-radius: 5px; border: none; background-color: #3a3a3a; color: #fff; }
+textarea { resize: none; height: 100px; }
 </style>
 </head>
 <body>
@@ -109,6 +112,7 @@ img { max-width: 100px; }
 <tr>
 <th>ID</th>
 <th>Nome</th>
+<th>Descrição</th>
 <th>Preço</th>
 <th>Estoque</th>
 <th>Categoria</th>
@@ -122,6 +126,7 @@ img { max-width: 100px; }
 <tr>
 <td><?= $prod['id'] ?></td>
 <td><?= htmlspecialchars($prod['nome']) ?></td>
+<td><?= htmlspecialchars($prod['descricao']) ?></td>
 <td><?= number_format($prod['preco'], 2, ',', '.') ?></td>
 <td><?= $prod['estoque'] ?></td>
 <td><?= htmlspecialchars($prod['categoria']) ?></td>
@@ -149,6 +154,9 @@ img { max-width: 100px; }
 <label>Nome:</label>
 <input type="text" name="nome" value="<?= htmlspecialchars($produtoEditar['nome']) ?>" required>
 
+<label>Descrição:</label>
+<textarea name="descricao" required><?= htmlspecialchars($produtoEditar['descricao']) ?></textarea>
+
 <label>Preço:</label>
 <input type="number" name="preco" step="0.01" value="<?= $produtoEditar['preco'] ?>" required>
 
@@ -158,8 +166,7 @@ img { max-width: 100px; }
 <label>Categoria:</label>
 <select name="categoria_id" required>
 <?php foreach ($categorias as $cat): ?>
-<option value="<?= $cat['id'] ?>" 
-    <?= $produtoEditar['categoria_id'] == $cat['id'] ? 'selected' : '' ?>>
+<option value="<?= $cat['id'] ?>" <?= $produtoEditar['categoria_id'] == $cat['id'] ? 'selected' : '' ?>>
     <?= htmlspecialchars($cat['nome']) ?>
 </option>
 <?php endforeach; ?>
@@ -168,8 +175,7 @@ img { max-width: 100px; }
 <label>Gênero:</label>
 <select name="genero_id" required>
 <?php foreach ($generos as $gen): ?>
-<option value="<?= $gen['id'] ?>" 
-    <?= $produtoEditar['genero_id'] == $gen['id'] ? 'selected' : '' ?>>
+<option value="<?= $gen['id'] ?>" <?= $produtoEditar['genero_id'] == $gen['id'] ? 'selected' : '' ?>>
     <?= htmlspecialchars($gen['nome']) ?>
 </option>
 <?php endforeach; ?>

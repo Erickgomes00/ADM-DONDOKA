@@ -32,6 +32,7 @@ try {
 // Processa formulário
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = $_POST['nome'];
+    $descricao = $_POST['descricao'];
     $preco = $_POST['preco'];
     $estoque = $_POST['estoque'];
     $categoria_id = $_POST['categoria_id'];
@@ -48,11 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $sql = "INSERT INTO produto (nome, preco, estoque, categoria_id, genero_id, imagem_url)
-                VALUES (:nome, :preco, :estoque, :categoria_id, :genero_id, :imagem_url)";
+        $sql = "INSERT INTO produto (nome, descricao, preco, estoque, categoria_id, genero_id, imagem_url)
+                VALUES (:nome, :descricao, :preco, :estoque, :categoria_id, :genero_id, :imagem_url)";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             ':nome' => $nome,
+            ':descricao' => $descricao,
             ':preco' => $preco,
             ':estoque' => $estoque,
             ':categoria_id' => $categoria_id,
@@ -75,65 +77,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <title>Cadastro de Produto</title>
 <style>
-body {
-    background-color: #1e1e1e;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+/* MESMO ESTILO QUE VOCÊ USAVA */
+body { background-color: #1e1e1e; color: #fff; font-family: Arial, sans-serif; margin:0;padding:0;}
+.container { max-width:700px; margin:50px auto; background-color:#2e2e2e; padding:30px; border-radius:10px;}
+h1 { text-align:center; margin-bottom:30px;}
+label { display:block; margin-bottom:5px; font-weight:bold;}
+input[type="text"], input[type="number"], select, input[type="file"], textarea {
+    width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:none; background-color:#3a3a3a; color:#fff;
 }
-.container {
-    max-width: 700px;
-    margin: 50px auto;
-    background-color: #2e2e2e;
-    padding: 30px;
-    border-radius: 10px;
-}
-h1 {
-    text-align: center;
-    margin-bottom: 30px;
-}
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-input[type="text"],
-input[type="number"],
-select,
-input[type="file"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    border: none;
-    background-color: #3a3a3a;
-    color: #fff;
-}
-input[type="file"] {
-    padding: 5px;
-}
-button {
-    background-color: #555;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-button:hover {
-    background-color: #777;
-}
-a {
-    display: inline-block;
-    margin-top: 15px;
-    text-decoration: none;
-    color: #fff;
-}
-a:hover {
-    text-decoration: underline;
-}
+textarea { height:100px; resize:none; }
+input[type="file"] { padding:5px; }
+button { background-color:#555; color:#fff; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-size:16px;}
+button:hover { background-color:#777; }
+a { display:inline-block; margin-top:15px; text-decoration:none; color:#fff;}
+a:hover { text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -143,6 +100,9 @@ a:hover {
 <form action="" method="post" enctype="multipart/form-data">
     <label>Nome:</label>
     <input type="text" name="nome" required>
+
+    <label>Descrição:</label>
+    <textarea name="descricao" required></textarea>
 
     <label>Preço:</label>
     <input type="number" name="preco" step="0.01" required>
