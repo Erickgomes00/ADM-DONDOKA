@@ -68,9 +68,10 @@ $stmt = $conn->query("SELECT * FROM genero ORDER BY nome");
 $generos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // ========================
-// BUSCAR TODOS PRODUTOS
+// BUSCAR TODOS PRODUTOS + CORES
 // ========================
 $sql = "SELECT p.id, p.nome, p.descricao, p.preco, p.estoque, p.imagem_url,
+               p.cores,
                c.nome AS categoria, g.nome AS genero
         FROM produto p
         LEFT JOIN categoria c ON p.categoria_id = c.id
@@ -88,7 +89,7 @@ $produtos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <title>Listar Produtos</title>
 <style>
 body { background-color: #1e1e1e; color: #fff; font-family: Arial, sans-serif; }
-.container { max-width: 1000px; margin: 50px auto; background-color: #2e2e2e; padding: 30px; border-radius: 10px; }
+.container { max-width: 1100px; margin: 50px auto; background-color: #2e2e2e; padding: 30px; border-radius: 10px; }
 h1 { text-align: center; margin-bottom: 20px; }
 table { width: 100%; border-collapse: collapse; }
 th, td { border: 1px solid #555; padding: 10px; text-align: center; }
@@ -98,8 +99,15 @@ tr:hover { background-color: #3e3e3e; }
 a, button { color: #fff; text-decoration: none; padding: 5px 10px; border-radius: 5px; background-color: #555; border: none; cursor: pointer; }
 a:hover, button:hover { background-color: #777; }
 img { max-width: 100px; }
-.form-editar input, .form-editar select, .form-editar textarea { width: 100%; padding: 8px; margin: 5px 0; border-radius: 5px; border: none; background-color: #3a3a3a; color: #fff; }
-textarea { resize: none; height: 100px; }
+
+.cor-box {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    display: inline-block;
+    margin: 3px;
+    border: 1px solid #aaa;
+}
 </style>
 </head>
 <body>
@@ -117,11 +125,13 @@ textarea { resize: none; height: 100px; }
 <th>Estoque</th>
 <th>Categoria</th>
 <th>Gênero</th>
+<th>Cores</th>
 <th>Imagem</th>
 <th>Ações</th>
 </tr>
 </thead>
 <tbody>
+
 <?php foreach ($produtos as $prod): ?>
 <tr>
 <td><?= $prod['id'] ?></td>
@@ -131,60 +141,35 @@ textarea { resize: none; height: 100px; }
 <td><?= $prod['estoque'] ?></td>
 <td><?= htmlspecialchars($prod['categoria']) ?></td>
 <td><?= htmlspecialchars($prod['genero']) ?></td>
+
+<td>
+<?php 
+    $cores = json_decode($prod['cores'], true);
+    if (!empty($cores)) {
+        foreach ($cores as $cor) {
+            echo "<span class='cor-box' style='background-color: {$cor}'></span>";
+        }
+    } else {
+        echo "—";
+    }
+?>
+</td>
+
 <td>
 <?php if($prod['imagem_url']): ?>
-<img src="<?= htmlspecialchars($prod['imagem_url']) ?>" alt="">
+    <img src="<?= htmlspecialchars($prod['imagem_url']) ?>" alt="">
 <?php endif; ?>
 </td>
+
 <td>
 <a href="listar_produtos.php?editar=<?= $prod['id'] ?>">Editar</a> |
 <a href="listar_produtos.php?excluir=<?= $prod['id'] ?>" onclick="return confirm('Deseja realmente excluir?')">Excluir</a>
 </td>
 </tr>
 <?php endforeach; ?>
+
 </tbody>
 </table>
-
-<?php if ($produtoEditar): ?>
-<div class="form-editar">
-<h2>Editar Produto ID <?= $produtoEditar['id'] ?></h2>
-<form method="POST" action="listar_produtos.php">
-<input type="hidden" name="id" value="<?= $produtoEditar['id'] ?>">
-
-<label>Nome:</label>
-<input type="text" name="nome" value="<?= htmlspecialchars($produtoEditar['nome']) ?>" required>
-
-<label>Descrição:</label>
-<textarea name="descricao" required><?= htmlspecialchars($produtoEditar['descricao']) ?></textarea>
-
-<label>Preço:</label>
-<input type="number" name="preco" step="0.01" value="<?= $produtoEditar['preco'] ?>" required>
-
-<label>Estoque:</label>
-<input type="number" name="estoque" value="<?= $produtoEditar['estoque'] ?>" required>
-
-<label>Categoria:</label>
-<select name="categoria_id" required>
-<?php foreach ($categorias as $cat): ?>
-<option value="<?= $cat['id'] ?>" <?= $produtoEditar['categoria_id'] == $cat['id'] ? 'selected' : '' ?>>
-    <?= htmlspecialchars($cat['nome']) ?>
-</option>
-<?php endforeach; ?>
-</select>
-
-<label>Gênero:</label>
-<select name="genero_id" required>
-<?php foreach ($generos as $gen): ?>
-<option value="<?= $gen['id'] ?>" <?= $produtoEditar['genero_id'] == $gen['id'] ? 'selected' : '' ?>>
-    <?= htmlspecialchars($gen['nome']) ?>
-</option>
-<?php endforeach; ?>
-</select>
-
-<button type="submit" name="atualizar">Atualizar Produto</button>
-</form>
-</div>
-<?php endif; ?>
 
 <a href="../index.php" class="btn-voltar">← Voltar ao Painel</a>
 </div>

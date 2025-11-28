@@ -54,6 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $categoria_id = $_POST['categoria_id'];
     $genero_id = $_POST['genero_id'];
 
+    // 🎨 Recebe cores (hexadecimal)
+    $cores = !empty($_POST['cores']) ? explode(",", $_POST['cores']) : [];
+    $cores = array_map('trim', $cores); // remove espaços
+    $cores = json_encode($cores); // transforma em JSON para salvar no jsonb
+
+    // Upload da imagem
     if (!empty($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
         $upload = $cloudinary->uploadApi()->upload(
             $_FILES['imagem']['tmp_name'],
@@ -64,9 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("⚠️ A imagem é obrigatória!");
     }
 
+    // Inserção no banco já com cores
     try {
-        $sql = "INSERT INTO produto (nome, descricao, preco, estoque, categoria_id, genero_id, imagem_url)
-                VALUES (:nome, :descricao, :preco, :estoque, :categoria_id, :genero_id, :imagem_url)";
+        $sql = "INSERT INTO produto (nome, descricao, preco, estoque, categoria_id, genero_id, imagem_url, cores)
+                VALUES (:nome, :descricao, :preco, :estoque, :categoria_id, :genero_id, :imagem_url, :cores)";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             ':nome' => $nome,
@@ -75,7 +82,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':estoque' => $estoque,
             ':categoria_id' => $categoria_id,
             ':genero_id' => $genero_id,
-            ':imagem_url' => $imagem_url
+            ':imagem_url' => $imagem_url,
+            ':cores' => $cores
         ]);
 
         header("Location: listar_produtos.php?sucesso=1");
@@ -110,6 +118,7 @@ a:hover { text-decoration: underline; }
 <h1>Cadastro de Produto</h1>
 
 <form action="" method="post" enctype="multipart/form-data">
+
     <label>Nome:</label>
     <input type="text" name="nome" required>
 
@@ -137,6 +146,10 @@ a:hover { text-decoration: underline; }
             <option value="<?= $gen['id'] ?>"><?= htmlspecialchars($gen['nome']) ?></option>
         <?php endforeach; ?>
     </select>
+
+    <!-- 🎨 Campo de cores -->
+    <label>Cores (hexadecimal, separadas por vírgula):</label>
+    <input type="text" name="cores" placeholder="#000000, #FFFFFF, #FF5733">
 
     <label>Imagem:</label>
     <input type="file" name="imagem" accept="image/*" required>

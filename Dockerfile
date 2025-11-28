@@ -72,5 +72,5 @@ RUN chown -R www-data:www-data /opt/render/project/src \
 # ==========================
 # Expondo porta e comando final
 # ==========================
-EXPOSE 80
+EXPOSE 3030
 CMD ["apache2-foreground"]
